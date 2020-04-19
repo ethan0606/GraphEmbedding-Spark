@@ -1,2 +1,4 @@
-# GraphEmbedding
-graph embedding include deepWalk, LINE, Node2Vec etc
+# Graph Embedding Implementation on Spark
+
+spark implementation for deepWalk and node2vec
+
