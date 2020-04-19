@@ -12,12 +12,13 @@ trait RandomWalk extends Serializable {
 	var numWalk: Int = 10
 	var walkLength: Int = 10
 	var bcMaxDegree: Int = 30
-
+	var weightLog:Boolean = false
 
 	var srcCol: String = "src"
 	var dstCol: String = "dst"
 	var weightCol: String = "weight"
 	var outputCol: String = "sequence"
+
 
 	/**
 		* initialize the graph
@@ -40,13 +41,19 @@ trait RandomWalk extends Serializable {
 		).map(x => {
 			val src = x.getLong(0)
 			val dstSeq = x.getSeq[Long](1)
-			val weightSeq = x.getSeq[Double](2)
+			var weightSeq = x.getSeq[Double](2)
+			if (weightLog) weightSeq = weightSeq.map(x=> math.log1p(x))
 			val dstWeight = dstSeq.zip(weightSeq).sortBy(_._2).reverse.take(bcMaxDegree)
 			(src, NodeAttr(neighbors = dstWeight.map(x => (x._1, x._2)).toArray))
 		}).rdd
 
 		GraphOps.initTransitionProb(spark, edges, vertices, p, q)
 
+	}
+
+	def setWeightLog(weightLog:Boolean): this.type  = {
+		this.weightLog = weightLog
+		this
 	}
 
 	def setBcMaxDegree(bcMaxDegree: Int): this.type = {
