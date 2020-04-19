@@ -1,30 +1,72 @@
 package com.github.ethan
 
+import com.github.ethan.util.{ArgsParser, DataLoader, GraphUtil, Word2VecIndexGenerator}
+import com.github.ethan.walker.DeepWalk
+import org.apache.spark.ml.feature.Word2Vec
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 
 object Main {
 
 	def main(args: Array[String]): Unit = {
 
-		val spark = SparkSession.builder().master("local").getOrCreate()
+		val options = Array(
+			"dataPath",
+			"embeddingPath",
+			"indexPath",
+			"vectorSize",
+			"windowSize",
+			"maxIter",
+			"topK",
+			"numWalk",
+			"walkLength",
+			"masterURL"
+		)
 
-		val df = spark.createDataFrame(
-			Seq((1L, 2L, 0.5), (1L, 3L, 3.0), (2L, 3L, 1.0), (2L, 1L, 1.5))
-		).toDF("src", "dst", "weight")
+		val argParser = ArgsParser.get(args, options)
 
-		val processedDF = GraphUtil.preProcess(df)
+		val dataPath = argParser.getString("dataPath")
+		val embeddingPath = argParser.getString("embeddingPath")
+		val indexPath = argParser.getString("indexPath")
+		val vectorSize = argParser.getInt("vectorSize")
+		val windowSize = argParser.getInt("windowSize")
+		val numWalk = argParser.getInt("numWalk")
+		val walkLength = argParser.getInt("dataPath")
+		val masterURL = argParser.getString("masterURL")
+		val maxIter = argParser.getInt("maxIter")
 
-		processedDF.show()
+		val spark = SparkSession.builder().master(masterURL).getOrCreate()
 
+		val data = DataLoader.loadEdgeList(spark, dataPath)
 
-		val walk = new Node2Vec()
-			.setWalkLength(5)
-			.setNumWalk(2)
+		val processedDF = GraphUtil.preProcess(data)
 
-		val result = walk.randomWalk(processedDF)
+		val walk = new DeepWalk()
+			.setNumWalk(numWalk)
+			.setWalkLength(walkLength)
 
-		result.show()
+		val result = walk.randomWalk(processedDF).cache()
+		result.first()
 
+		val w2v = new Word2Vec()
+			.setMaxSentenceLength(100)
+			.setMinCount(2)
+			.setWindowSize(windowSize)
+			.setVectorSize(vectorSize)
+			.setMaxIter(maxIter)
+			.setNumPartitions(30)
+			.setInputCol("sequence")
+			.fit(result)
+
+		var wv = w2v.getVectors.toDF("word", "vector")
+
+		wv.write.mode("overwrite").save(embeddingPath)
+
+		wv = wv.withColumn("vector", Word2VecIndexGenerator.vecToSeq(col("vector")))
+
+		val index = Word2VecIndexGenerator.generateIndex(20, wv, wv, "word", "vector", "word", "vector")
+
+		index.write.mode("overwrite").save(indexPath)
 
 	}
 }

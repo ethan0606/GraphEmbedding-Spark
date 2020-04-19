@@ -1,4 +1,4 @@
-package com.github.ethan
+package com.github.ethan.walker
 
 import com.github.ethan.graph.{AliasOps, NodeAttr}
 import org.apache.spark.rdd.RDD
@@ -55,7 +55,7 @@ class DeepWalk extends RandomWalk {
 			}
 		}
 
-		result.toDF(outputCol)
+		result.map { x => x.map(_.toString) }.toDF(outputCol)
 	}
 
 }

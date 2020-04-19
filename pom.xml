@@ -47,29 +47,6 @@
             <version>${scala.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>${redis.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ml.dmlc</groupId>
-            <artifactId>xgboost4j</artifactId>
-            <version>0.72</version>
-        </dependency>
-        <dependency>
-            <groupId>ml.dmlc</groupId>
-            <artifactId>xgboost4j-spark</artifactId>
-            <version>0.72</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>spark-tensorflow-connector_2.11</artifactId>
-            <version>1.13.1</version>
-        </dependency>
-
     </dependencies>
 
     <build>

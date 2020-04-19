@@ -1,4 +1,4 @@
-package com.github.ethan
+package com.github.ethan.walker
 
 import com.github.ethan.graph.{AliasOps, NodeAttr}
 import org.apache.spark.rdd.RDD
@@ -53,7 +53,7 @@ class Node2Vec extends RandomWalk {
 			}
 
 		}
-		result.map { x => x._2.toArray }.toDF(outputCol)
+		result.map { x => x._2.map(_.toString).toArray }.toDF(outputCol)
 	}
 
 	def firstWalk(vertices: RDD[(Long, NodeAttr)]): RDD[(String, ArrayBuffer[Long])] = {
