@@ -11,23 +11,24 @@ trait RandomWalk extends Serializable {
 	var q: Double = 1.0
 	var numWalk: Int = 10
 	var walkLength: Int = 10
-	var bcMaxDegree:Int = 30
+	var bcMaxDegree: Int = 30
 
 
-	var srcCol:String = "src"
-	var dstCol:String = "dst"
-	var weightCol:String = "weight"
-	var outputCol:String = "sequence"
+	var srcCol: String = "src"
+	var dstCol: String = "dst"
+	var weightCol: String = "weight"
+	var outputCol: String = "sequence"
 
 	/**
 		* initialize the graph
+		*
 		* @param dataFrame input dataFrame
 		*/
-	def initGraph(dataFrame: DataFrame):Graph[NodeAttr, EdgeAttr] = {
+	def initGraph(dataFrame: DataFrame): Graph[NodeAttr, EdgeAttr] = {
 		val spark = dataFrame.sparkSession
 		import spark.implicits._
 
-		val edges = dataFrame.map(x=> {
+		val edges = dataFrame.map(x => {
 			val src = x.getAs[Long](srcCol)
 			val dst = x.getAs[Long](dstCol)
 			Edge(src, dst, EdgeAttr())
@@ -36,19 +37,19 @@ trait RandomWalk extends Serializable {
 		val vertices = dataFrame.groupBy(srcCol).agg(
 			collect_list(dstCol),
 			collect_list(weightCol)
-		).map(x=> {
+		).map(x => {
 			val src = x.getLong(0)
 			val dstSeq = x.getSeq[Long](1)
 			val weightSeq = x.getSeq[Double](2)
 			val dstWeight = dstSeq.zip(weightSeq).sortBy(_._2).reverse.take(bcMaxDegree)
-			(src, NodeAttr(neighbors = dstWeight.map(x=> (x._1, x._2)).toArray))
+			(src, NodeAttr(neighbors = dstWeight.map(x => (x._1, x._2)).toArray))
 		}).rdd
 
 		GraphOps.initTransitionProb(spark, edges, vertices, p, q)
 
 	}
 
-	def setBcMaxDegree(bcMaxDegree: Int):this.type ={
+	def setBcMaxDegree(bcMaxDegree: Int): this.type = {
 		this.bcMaxDegree = bcMaxDegree
 		this
 	}
@@ -73,22 +74,22 @@ trait RandomWalk extends Serializable {
 		this
 	}
 
-	def setSrcCol(srcCol:String):this.type  = {
+	def setSrcCol(srcCol: String): this.type = {
 		this.srcCol = srcCol
 		this
 	}
 
-	def setDstCol(dstCol:String):this.type  = {
+	def setDstCol(dstCol: String): this.type = {
 		this.dstCol = dstCol
 		this
 	}
 
-	def setWeightCol(weightCol:String):this.type  = {
+	def setWeightCol(weightCol: String): this.type = {
 		this.weightCol = weightCol
 		this
 	}
 
-	def setOutputCol(outputCol:String):this.type  = {
+	def setOutputCol(outputCol: String): this.type = {
 		this.outputCol = outputCol
 		this
 	}

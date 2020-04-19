@@ -49,17 +49,17 @@ object GraphOps {
 
 			edgeTriplet: EdgeTriplet[NodeAttr, EdgeAttr] =>
 
-			val (j, q) = GraphOps.setupEdgeAlias(bcP.value, bcQ.value)(
-				edgeTriplet.srcId,
-				edgeTriplet.srcAttr.neighbors,
-				edgeTriplet.dstAttr.neighbors)
+				val (j, q) = GraphOps.setupEdgeAlias(bcP.value, bcQ.value)(
+					edgeTriplet.srcId,
+					edgeTriplet.srcAttr.neighbors,
+					edgeTriplet.dstAttr.neighbors)
 
-			edgeTriplet.attr.J = j
-			edgeTriplet.attr.q = q
+				edgeTriplet.attr.J = j
+				edgeTriplet.attr.q = q
 
-			edgeTriplet.attr.dstNeighbors = edgeTriplet.dstAttr.neighbors.map(_._1)
+				edgeTriplet.attr.dstNeighbors = edgeTriplet.dstAttr.neighbors.map(_._1)
 
-			edgeTriplet.attr
+				edgeTriplet.attr
 		}
 
 		graph

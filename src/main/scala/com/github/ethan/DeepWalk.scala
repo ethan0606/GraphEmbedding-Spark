@@ -10,10 +10,11 @@ class DeepWalk extends RandomWalk {
 
 	/**
 		* generate the deep walk sequences
+		*
 		* @param dataFrame input dataFrame
 		* @return
 		*/
-	def randomWalk(dataFrame: DataFrame):DataFrame = {
+	def randomWalk(dataFrame: DataFrame): DataFrame = {
 
 		val spark = dataFrame.sparkSession
 		val sc = spark.sparkContext
@@ -28,10 +29,10 @@ class DeepWalk extends RandomWalk {
 		val nodeMap = vertices.collect().toMap[Long, NodeAttr]
 		val bcNodeMap = sc.broadcast(nodeMap)
 
-		var result:RDD[Array[Long]] = null
+		var result: RDD[Array[Long]] = null
 
 		for (_ <- 0 until numWalk) {
-			val sequence = vertices.map{ x =>
+			val sequence = vertices.map { x =>
 				val path = new ArrayBuffer[Long]()
 				val startNode = x._1
 				path.append(startNode)
