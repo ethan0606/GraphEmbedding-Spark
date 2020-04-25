@@ -1,13 +1,16 @@
 package com.github.ethan.util
 
-import org.apache.spark.ml.linalg.DenseVector
+import org.apache.spark.ml.linalg.{DenseVector, Vectors}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.udf
 
 object Word2VecIndexGenerator {
 
-	def vecToSeq: UserDefinedFunction = udf((x: DenseVector) => x.values.toSeq)
+	def vecToSeq: UserDefinedFunction = udf((x: DenseVector) => {
+		val norm = Vectors.norm(x, 2)
+		x.values.map(x=>x/norm)
+	})
 
 	def generateIndex(topK: Int,
 										vec1: DataFrame,
